@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="static\css\style.css" >
+
+
+    <title> {% block title %} AGOutdoors {% endblock %}</title>    
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">AGOutdoors</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{{ url_for('index')}}">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('trips')}}"> Trips </a>
+              </li>      
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('rates')}}"> Rates </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('contact')}}"> Book a Trip </a>
+              </li>      
+                </ul>
+              </li>
+            </ul> 
+          </div>
+        </div>
+      </nav>
+      <br/>
+      <img src="static/images/logo.png" class="rounded mx-auto d-block" alt="logo" width="700">
+    <br/> 
+    <hr color="grey"/>
+    <br />
+{% block content %}
+{% endblock %}
+<br />
+<hr color="grey"/>
+<br/>
+<div class="container">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5">
+      <div class="col"><a href="https://www.facebook.com/pages/category/Sports---Recreation/Outcast-Professional-Fishing-Team-111306491004972/"><img src="static/images/outcast.jpg" class="img-fluid" alt="outcast"> </a></div>
+      <div class="col"><a href="https://www.windrider.com/"><img src="static/images/wind.jpg" class="img-fluid" alt="wind"></a></div>
+      <div class="col"><a href="https://www.facebook.com/snyperrods?mibextid=LQQJ4d"><img src="static/images/snyper.jpeg" class="img-fluid" alt="snyper"></a></div>
+      <div class="col"><a href="https://riverrockinn.net/"><img src="static/images/river.png" class="img-fluid" alt="river"></a></div>
+      <div class="col"><a href="http://www.baitrigs.com/"><img src="static/images/baitrigs.png" class="img-fluid" alt="baitrigs"></a></div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5">
+      <div class="col"><a href="https://www.hannaysmarine.com/"><img src="static/images/hannays.png" class="img-fluid" alt="hannays"></a></div>
+      <div class="col"><a href="https://aimfishing.com/"><img src="static/images/aim.jpg" class="img-fluid" alt="aim"></a></div>
+      <div class="col"><a href="http://www.anglersallwisconsin.com/"><img src="static/images/angler.png" class="img-fluid" alt="angler"></a></div>
+      <div class="col"> <a href="https://yarcraft.com/"> <img src="static/images/yarcraft.jpg" class="img-fluid" alt="yarcraft"> </a> </div>
+      <div class="col"><a href="https://thelumberjacklodge.net/"><img src="static/images/lumberjack.png" class="img-fluid" alt="lumberjack"></a></div>
+    </div>
+  </div>
+
+  <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    -->
+  </body>
+</html>

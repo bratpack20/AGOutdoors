@@ -1,0 +1,40 @@
+{% extends 'base.html' %} 
+{% block content %}
+
+      <div class = "container">
+        
+        {% if error_statement %}
+        <div class="alert alert-danger" role="alert">
+            {{error_statement}}
+          </div>
+          {% endif %}
+    <h1> Book a Trip Here! </h1>
+    <br/>
+    <h2> (Lake, Time, and any other questions will be answered from Captain Andy after submitting.)</h2>
+    <br/>
+
+    <form action="/form" method="POST">
+        <div class="mb-3">
+          <label for="Name" class="form-label">Name:</label>
+          <input type="text" class="form-control" id="name" aria-describedby="emailHelp" 
+          placeholder="Name" name="name">
+        </div>
+
+        <div class="mb-3">
+            <label for="Phone Number" class="form-label">Phone Number:</label>
+            <input type="text" class="form-control" id="phone_number" aria-describedby="emailHelp"
+            placeholder="Phone Number" name="phone_number">
+          </div>
+    
+          <div class="mb-3">
+            <label for="Date of Trip" class="form-label">Date Requested: (First Day of Trip, if Multiple Day Trip Desired)</label>
+            <input type="text" class="form-control" id="date" aria-describedby="emailHelp"
+            placeholder="Date" name="date">
+            </div>
+                      
+        <br />
+        <button type="submit" class="btn btn-secondary">Submit</button>
+      </form>
+      </div>
+
+  {% endblock %}
