@@ -3,12 +3,12 @@ from datetime import datetime
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
+import os
 
 #add gallery with database, add video archive. My boat page
 
 app = Flask(__name__)
-
+app.secret_key = 'supersecretkey'
 
 @app.route('/')
 def index():
@@ -53,6 +53,34 @@ def form():
     server.quit()
     return render_template("form.html", name=name, phone=phone,date=date)
     
- 
+@app.route("/gallery",defaults={'title':'Gallery Home','filename':'No_File'},methods=["GET"])
+@app.route("/gallery/<title>",defaults={'filename':'New_File'}, methods=["GET","POST"])
+@app.route("/gallery/<title>/<filename>", methods=["GET","POST"])
+def gallery(title,filename):
+    images = os.listdir('static/gallery')
+    if request.method == 'POST':
+        if title == 'Upload':
+            allowed_file_types = ['.png','jpg','.jpeg']
+            file = request.files['file']
+            if not any(str(file.filename).endswith(file_type) for file_type in allowed_file_types):
+                error_statement = "Invalid File Type"
+                return render_template("gallery.html",images=images,error_statement=error_statement)
+            else:
+                file.save(os.path.join('static/gallery', file.filename))
+                success_statement = 'Successfully Uploaded Image to Gallery!'
+                images = os.listdir('static/gallery')
+                return render_template("gallery.html",images=images,success_statement=success_statement)
+        elif title == 'Delete':
+            filepath = os.path.join('static/gallery', filename)
+            if os.path.exists(filepath):
+                os.remove(filepath)
+                images = os.listdir('static/gallery')
+                success_statement = 'Image deleted successfully'
+                return render_template("gallery.html",images=images,success_statement=success_statement)
+            else:
+                error_statement = 'Image not found'
+                return render_template("gallery.html",images=images,success_statement=success_statement)
+    return render_template("gallery.html",images=images)
+
 if __name__ == "__main__":
     app.run(debug=True) 

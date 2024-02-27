@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if error_statement %}
+<div class="alert alert-danger" role="alert">
+    {{error_statement}}
+  </div>
+{% endif %}
+{% if success_statement %}
+<div class="alert alert-success" role="alert">
+    {{success_statement}}
+  </div>
+{% endif%}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Gallery</h1>
+    <div class="d-flex justify-content-center mb-4">
+        <form action="{{ url_for('gallery',title='Upload') }}" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" class="form-control">
+            <center><button type="submit" class="btn btn-primary mt-2">Upload</button> </center>
+        </form>
+    </div>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for image in images %}
+        <div class="col">
+            <div class="card shadow-sm">
+                <img src="{{ url_for('static', filename='gallery/' + image) }}" class="card-img-top" alt="{{ image }}">
+                <div class="card-body">
+                    <p class="card-text">{{ image }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                            <form action="{{ url_for('gallery',title='Delete', filename=image) }}" method="POST">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

@@ -33,7 +33,10 @@
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('contact')}}"> Book a Trip </a>
-              </li>      
+              </li>    
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('gallery')}}"> Gallery </a>
+              </li>   
                 </ul>
               </li>
             </ul> 
@@ -41,7 +44,7 @@
         </div>
       </nav>
       <br/>
-      <img src="static/images/logo.png" class="rounded mx-auto d-block" alt="logo" width="700">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" class="rounded mx-auto d-block" alt="logo" width="700">
     <br/> 
     <hr color="grey"/>
     <br />
@@ -51,23 +54,23 @@
 <hr color="grey"/>
 <br/>
 <div class="container">
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5">
-      <div class="col"><a href="https://www.facebook.com/pages/category/Sports---Recreation/Outcast-Professional-Fishing-Team-111306491004972/"><img src="static/images/outcast.jpg" class="img-fluid" alt="outcast"> </a></div>
-      <div class="col"><a href="https://www.windrider.com/"><img src="static/images/wind.jpg" class="img-fluid" alt="wind"></a></div>
-      <div class="col"><a href="https://www.facebook.com/snyperrods?mibextid=LQQJ4d"><img src="static/images/snyper.jpeg" class="img-fluid" alt="snyper"></a></div>
-      <div class="col"><a href="https://riverrockinn.net/"><img src="static/images/river.png" class="img-fluid" alt="river"></a></div>
-      <div class="col"><a href="http://www.baitrigs.com/"><img src="static/images/baitrigs.png" class="img-fluid" alt="baitrigs"></a></div>
-    </div>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5">
+      <div class="col"><a href="https://www.facebook.com/pages/category/Sports---Recreation/Outcast-Professional-Fishing-Team-111306491004972/"><img src="{{ url_for('static', filename='images/outcast.jpg') }}" class="img-fluid" alt="outcast"></a></div>
+      <div class="col"><a href="https://www.windrider.com/"><img src="{{ url_for('static', filename='images/wind.jpg') }}" class="img-fluid" alt="wind"></a></div>
+      <div class="col"><a href="https://www.facebook.com/snyperrods?mibextid=LQQJ4d"><img src="{{ url_for('static', filename='images/snyper.jpeg') }}" class="img-fluid" alt="snyper"></a></div>
+      <div class="col"><a href="https://riverrockinn.net/"><img src="{{ url_for('static', filename='images/river.png') }}" class="img-fluid" alt="river"></a></div>
+      <div class="col"><a href="http://www.baitrigs.com/"><img src="{{ url_for('static', filename='images/baitrigs.png') }}" class="img-fluid" alt="baitrigs"></a></div>
   </div>
-  <div class="container">
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5">
-      <div class="col"><a href="https://www.hannaysmarine.com/"><img src="static/images/hannays.png" class="img-fluid" alt="hannays"></a></div>
-      <div class="col"><a href="https://aimfishing.com/"><img src="static/images/aim.jpg" class="img-fluid" alt="aim"></a></div>
-      <div class="col"><a href="http://www.anglersallwisconsin.com/"><img src="static/images/angler.png" class="img-fluid" alt="angler"></a></div>
-      <div class="col"> <a href="https://yarcraft.com/"> <img src="static/images/yarcraft.jpg" class="img-fluid" alt="yarcraft"> </a> </div>
-      <div class="col"><a href="https://thelumberjacklodge.net/"><img src="static/images/lumberjack.png" class="img-fluid" alt="lumberjack"></a></div>
-    </div>
+</div>
+<div class="container">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5">
+      <div class="col"><a href="https://www.hannaysmarine.com/"><img src="{{ url_for('static', filename='images/hannays.png') }}" class="img-fluid" alt="hannays"></a></div>
+      <div class="col"><a href="https://aimfishing.com/"><img src="{{ url_for('static', filename='images/aim.jpg') }}" class="img-fluid" alt="aim"></a></div>
+      <div class="col"><a href="http://www.anglersallwisconsin.com/"><img src="{{ url_for('static', filename='images/angler.png') }}" class="img-fluid" alt="angler"></a></div>
+      <div class="col"><a href="https://yarcraft.com/"><img src="{{ url_for('static', filename='images/yarcraft.jpg') }}" class="img-fluid" alt="yarcraft"></a></div>
+      <div class="col"><a href="https://thelumberjacklodge.net/"><img src="{{ url_for('static', filename='images/lumberjack.png') }}" class="img-fluid" alt="lumberjack"></a></div>
   </div>
+</div>
 
   <!-- Optional JavaScript; choose one of the two! -->
 
