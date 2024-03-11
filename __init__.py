@@ -3,16 +3,31 @@ from datetime import datetime
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from cryptography.fernet import Fernet
 import os
-
-#add gallery with database, add video archive. My boat page
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
+def encrypt_message(message):
+    key = os.getenv('encryption_key')
+    cipher = Fernet(key)
+    encrypt_message = cipher.encrypt(message.encode())
+    return encrypt_message
+
+def decrypt_message(encrypted_message):
+    key = os.getenv('encryption_key')
+    cipher = Fernet(key)
+    decrypted_message = cipher.decrypt(encrypted_message)
+    return decrypted_message.decode()
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route("/login",methods=['POST','GET'])
+def login():
+    return render_template("login.html")
 
 @app.route('/trips')
 def trips():

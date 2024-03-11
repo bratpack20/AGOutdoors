@@ -1,0 +1,29 @@
+{% extends 'base.html' %} 
+{% block content %}
+      <div class = "container">
+        {% if error_statement %}
+        <div class="alert alert-danger" role="alert">
+            {{error_statement}}
+          </div>
+          {% endif %}
+    <h1><center> Login </center></h1>
+    <br/>
+
+    <form action="/login" method="POST">
+        <div class="mb-3">
+          <label for="username" class="form-label">Username:</label>
+          <input type="text" class="form-control" id="username" aria-describedby="emailHelp" 
+          placeholder="Userame" name="username">
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">password:</label>
+            <input type="password" class="form-control" id="password" aria-describedby="emailHelp"
+            placeholder="password" name="password">
+          </div>              
+        <br />
+        <button type="submit" class="btn btn-secondary">Submit</button>
+      </form>
+      </div>
+
+  {% endblock %}
