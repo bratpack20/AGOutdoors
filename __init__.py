@@ -5,9 +5,28 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from cryptography.fernet import Fernet
 import os
+import dotenv
+import mysql.connector.pooling
+import base64
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:ShinyBulbasaur20!@localhost/agoutdoors'
+engine = mysql.connector.pooling.MySQLConnectionPool(
+    host = 'localhost',
+    user = 'root',
+    password = 'ShinyBulbasaur20!',
+    database = 'agoutdoors',
+    auth_plugin = "mysql_native_password",
+    pool_name = "agoutdoors",
+    pool_size = 4,
+    pool_reset_session = True
+    )
+
+def get_Db_Results(cursor):
+    data=[]
+    for results in cursor.stored_results(): data = results.fetchall()
+    return data
 
 def encrypt_message(message):
     key = os.getenv('encryption_key')
@@ -16,9 +35,10 @@ def encrypt_message(message):
     return encrypt_message
 
 def decrypt_message(encrypted_message):
-    key = os.getenv('encryption_key')
-    cipher = Fernet(key)
-    decrypted_message = cipher.decrypt(encrypted_message)
+    key_base64 = os.getenv('encryption_key')
+    key_bytes = base64.urlsafe_b64decode(key_base64 + '=' * (4 - len(key_base64) % 4))  # Padding to make the length a multiple of 4
+    cipher = Fernet(key_bytes)
+    decrypted_message = cipher.decrypt(encrypted_message.encode())
     return decrypted_message.decode()
 
 @app.route('/')
@@ -27,6 +47,23 @@ def index():
 
 @app.route("/login",methods=['POST','GET'])
 def login():
+    if request.method == 'POST':
+        # username = request.form.get("username")
+        # password = request.form.get("password")
+        connection = engine.get_connection()
+        cursor = connection.cursor() 
+        cursor.callproc("select_all", ("users",))
+        users = get_Db_Results(cursor)
+        for user in users:
+            username = user[0]
+            password = user[1]
+            username = decrypt_message(username)
+            print(username)
+            password = decrypt_message(password)
+            print(password)
+        cursor.close()
+        connection.close()
+        return render_template("login.html",success_statement='Successfully created new user!')
     return render_template("login.html")
 
 @app.route('/trips')
