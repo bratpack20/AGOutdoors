@@ -29,17 +29,21 @@ def get_Db_Results(cursor):
     return data
 
 def encrypt_message(message):
-    key = os.getenv('encryption_key')
-    cipher = Fernet(key)
-    encrypt_message = cipher.encrypt(message.encode())
-    return encrypt_message
+   #Encrypts passed in string and returns encrypted string
+    the_key = os.getenv("encryption_key")
+    realkey = bytes(the_key, encoding='utf-8')
+    fernet=Fernet(realkey)
+    encrypted_data=fernet.encrypt(str(message).encode()).decode('utf-8')
+    return encrypted_data
 
 def decrypt_message(encrypted_message):
-    key_base64 = os.getenv('encryption_key')
-    key_bytes = base64.urlsafe_b64decode(key_base64 + '=' * (4 - len(key_base64) % 4))  # Padding to make the length a multiple of 4
-    cipher = Fernet(key_bytes)
-    decrypted_message = cipher.decrypt(encrypted_message.encode())
-    return decrypted_message.decode()
+    #decrypts passed in encrypted string and returns decrypted string
+    the_key = os.getenv("encryption_key")
+    realkey = bytes(the_key, encoding='utf-8')
+    fernet=Fernet(realkey)
+    variable=bytes(str(encrypted_message), encoding="utf-8")
+    variable=fernet.decrypt(variable).decode()
+    return variable
 
 @app.route('/')
 def index():
@@ -48,18 +52,26 @@ def index():
 @app.route("/login",methods=['POST','GET'])
 def login():
     if request.method == 'POST':
-        # username = request.form.get("username")
-        # password = request.form.get("password")
+        
         connection = engine.get_connection()
         cursor = connection.cursor() 
+        ## create account # testing purposes only
+        # username = request.form.get("username")
+        # password = request.form.get("password")
+        # username = encrypt_message(username)
+        # password = encrypt_message(password)
+        # cursor.callproc('insert_into_db',('users','users.username,users.password',f"'{username}','{password}'"))
+        ##
+        ## login
         cursor.callproc("select_all", ("users",))
         users = get_Db_Results(cursor)
         for user in users:
-            username = user[0]
-            password = user[1]
-            username = decrypt_message(username)
+            print(user)
+            username = user[1]
+            password = user[2]
+            username = decrypt_message(str(username).replace("b'","").replace("'",""))
             print(username)
-            password = decrypt_message(password)
+            password = decrypt_message(str(password).replace("b'","").replace("'",""))
             print(password)
         cursor.close()
         connection.close()
