@@ -17,7 +17,7 @@ BEGIN
 END //
 DELIMITER ;
 
-DROP PROCEDURE IF EXISTS select_all
+DROP PROCEDURE IF EXISTS select_all;
 
 DELIMITER //
 
@@ -27,6 +27,20 @@ CREATE PROCEDURE select_all (
 BEGIN
     SET @sql = CONCAT('SELECT * FROM ', table_name, ';');
     PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //
+
+DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS select_by_value;
+DELIMITER //
+
+CREATE PROCEDURE select_by_value (IN tablename VARCHAR(255), IN column_name VARCHAR(255), IN value VARCHAR(255))
+BEGIN
+    SET @sql_query = CONCAT("SELECT * FROM ", tablename," WHERE ", column_name, " = '", value,"'");
+    PREPARE stmt FROM @sql_query;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
 END //

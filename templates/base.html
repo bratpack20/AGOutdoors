@@ -39,9 +39,20 @@
             </li>   
           </ul>
           <ul class="navbar-nav ms-auto">
+            {% if currentuser %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <font color="white">{{currentuser}}</font>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                  <li><a class="dropdown-item" aria-current="page" href="{{ url_for('login')}}"><font color="white">Logout</font></a></li>
+                </ul>
+            </li>      
+            {% else %}       
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('login')}}">Login</a>
             </li>
+            {% endif %}
           </ul>
         </div>
       </div>
