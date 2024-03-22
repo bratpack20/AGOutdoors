@@ -46,3 +46,46 @@ BEGIN
 END //
 
 DELIMITER ;
+
+
+DROP PROCEDURE IF EXISTS select_all_images;
+DELIMITER //
+
+CREATE PROCEDURE select_all_images (
+)
+BEGIN
+    SET @sql = CONCAT('SELECT * FROM gallery_entry ORDER BY position;');
+    PREPARE stmt FROM @sql;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS delete_by_value;
+DELIMITER //
+
+CREATE PROCEDURE delete_by_value (IN tablename VARCHAR(255), IN column_name VARCHAR(255), IN value VARCHAR(255))
+BEGIN
+    SET @sql_query = CONCAT("DELETE FROM ", tablename," WHERE ", column_name, " = '", value,"'");
+    PREPARE stmt FROM @sql_query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+    COMMIT;
+END //
+
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS update_by_value;
+DELIMITER //
+
+CREATE PROCEDURE update_by_value (IN tablename VARCHAR(255), IN column_to_update VARCHAR(255), IN new_value VARCHAR(255), IN column_name VARCHAR(255), IN value VARCHAR(255))
+BEGIN
+    SET @sql_query = CONCAT("UPDATE ", tablename," SET ", column_to_update, " = '", new_value, "' WHERE ", column_name, " = '", value,"'");
+    PREPARE stmt FROM @sql_query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+    COMMIT;
+END //
+
+DELIMITER ;

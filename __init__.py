@@ -53,6 +53,22 @@ def check_if_logged_in():
     else:
         return None
 
+def get_images():
+    connection = engine.get_connection()
+    cursor = connection.cursor() 
+    cursor.callproc("select_all_images", ())
+    images = get_Db_Results(cursor)
+    cursor.close()
+    connection.close()
+    return images
+
+def insert_into_db(table,columns,values):
+    connection = engine.get_connection()
+    cursor = connection.cursor() 
+    cursor.callproc('insert_into_db',(table,columns,values))
+    cursor.close()
+    connection.close()
+
 @app.route('/')
 def index():
     currentuser = check_if_logged_in()
@@ -146,29 +162,75 @@ def form():
 @app.route("/gallery/<title>/<filename>", methods=["GET","POST"])
 def gallery(title,filename):
     currentuser = check_if_logged_in()
-    images = os.listdir('static/gallery')
+    images = get_images()
     if request.method == 'POST':
         if title == 'Upload':
-            allowed_file_types = ['.png','jpg','.jpeg']
+            description = request.form.get("description")
+            if len(description) > 4990:
+                error_statement = "Description is too long!"
+                return render_template("gallery.html",images=images,error_statement=error_statement, currentuser=currentuser)
+            allowed_file_types = ['.png','jpg','.jpeg','.PNG','.JPG','JPEG']
             file = request.files['file']
             if not any(str(file.filename).endswith(file_type) for file_type in allowed_file_types):
                 error_statement = "Invalid File Type"
                 return render_template("gallery.html",images=images,error_statement=error_statement, currentuser=currentuser)
             else:
+                num_images = len(images)
+                insert_into_db('gallery_entry','position,image_name,description',f"{num_images+1},'{file.filename}','{description}'")
                 file.save(os.path.join('static/gallery', file.filename))
                 success_statement = 'Successfully Uploaded Image to Gallery!'
-                images = os.listdir('static/gallery')
+                images = get_images()
                 return render_template("gallery.html",images=images,success_statement=success_statement, currentuser=currentuser)
         elif title == 'Delete':
-            filepath = os.path.join('static/gallery', filename)
+            connection = engine.get_connection()
+            cursor = connection.cursor()
+            cursor.callproc("select_by_value", ("gallery_entry","id",filename))
+            image = get_Db_Results(cursor)
+            image = image[0]
+            cursor.close()
+            connection.close() 
+            filepath = os.path.join('static/gallery', image[2])
             if os.path.exists(filepath):
                 os.remove(filepath)
-                images = os.listdir('static/gallery')
+                connection = engine.get_connection()
+                cursor = connection.cursor()
+                cursor.callproc("delete_by_value", ("gallery_entry","id",filename))
+                cursor.close()
+                connection.close() 
+                images = get_images()
                 success_statement = 'Image deleted successfully'
                 return render_template("gallery.html",images=images,success_statement=success_statement, currentuser=currentuser)
             else:
                 error_statement = 'Image not found'
                 return render_template("gallery.html",images=images,success_statement=success_statement, currentuser=currentuser)
+        elif title == 'Edit':
+            currentuser = check_if_logged_in()
+            if currentuser == None:
+                return render_template("gallery.html",error_statement='You must be logged in to view this page!' ,images=images, currentuser=currentuser)
+            connection = engine.get_connection()
+            cursor = connection.cursor()
+            cursor.callproc("select_by_value", ("gallery_entry","id",filename))
+            image = get_Db_Results(cursor)
+            image = image[0]
+            cursor.close()
+            connection.close()
+            return render_template("image_editor.html",image=image, currentuser=currentuser)
+        elif title == 'Complete Edit':
+            currentuser = check_if_logged_in()
+            if currentuser == None:
+                images = get_images()
+                return render_template("gallery.html",error_statement='You must be logged in to view this page!' ,images=images, currentuser=currentuser)
+            description = request.form.get("description")
+            if len(description) > 4990:
+                error_statement = "Description is too long!"
+                return render_template("gallery.html",images=images,error_statement=error_statement, currentuser=currentuser)
+            connection = engine.get_connection()
+            cursor = connection.cursor()
+            cursor.callproc("update_by_value", ("gallery_entry","description",description,"id",filename))
+            cursor.close()
+            connection.close()
+            images = get_images()
+            return render_template("gallery.html",images=images, currentuser=currentuser, success_statement='Successfully Updated Image Description!')
     return render_template("gallery.html",images=images, currentuser=currentuser)
 
 if __name__ == "__main__":
