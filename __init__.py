@@ -169,19 +169,36 @@ def gallery(title,filename):
             if len(description) > 4990:
                 error_statement = "Description is too long!"
                 return render_template("gallery.html",images=images,error_statement=error_statement, currentuser=currentuser)
+            description = str(description).replace("'","''")
             allowed_file_types = ['.png','jpg','.jpeg','.PNG','.JPG','JPEG']
             file = request.files['file']
             if not any(str(file.filename).endswith(file_type) for file_type in allowed_file_types):
                 error_statement = "Invalid File Type"
                 return render_template("gallery.html",images=images,error_statement=error_statement, currentuser=currentuser)
             else:
-                num_images = len(images)
-                insert_into_db('gallery_entry','position,image_name,description',f"{num_images+1},'{file.filename}','{description}'")
+                connection = engine.get_connection()
+                cursor = connection.cursor()
+                cursor.callproc("select_all_images", ())
+                images = get_Db_Results(cursor)
+                for image in images:
+                    cursor.callproc("select_by_value", ("gallery_entry","id",image[0]))
+                    image = get_Db_Results(cursor)
+                    image = image[0]
+                    position = image[1]
+                    new_position = int(position) + 1
+                    cursor.callproc("update_by_value", ("gallery_entry","position",new_position,"id",image[0]))
+                cursor.close()
+                connection.close()
+                insert_into_db('gallery_entry','position,image_name,description',f"0,'{file.filename}','{description}'")
                 file.save(os.path.join('static/gallery', file.filename))
                 success_statement = 'Successfully Uploaded Image to Gallery!'
                 images = get_images()
                 return render_template("gallery.html",images=images,success_statement=success_statement, currentuser=currentuser)
         elif title == 'Delete':
+            currentuser = check_if_logged_in()
+            if currentuser == None:
+                images = get_images()
+                return render_template("gallery.html",error_statement='You must be logged in to view this page!' ,images=images, currentuser=currentuser)
             connection = engine.get_connection()
             cursor = connection.cursor()
             cursor.callproc("select_by_value", ("gallery_entry","id",filename))
@@ -224,6 +241,7 @@ def gallery(title,filename):
             if len(description) > 4990:
                 error_statement = "Description is too long!"
                 return render_template("gallery.html",images=images,error_statement=error_statement, currentuser=currentuser)
+            description = str(description).replace("'","''")
             connection = engine.get_connection()
             cursor = connection.cursor()
             cursor.callproc("update_by_value", ("gallery_entry","description",description,"id",filename))
@@ -231,6 +249,29 @@ def gallery(title,filename):
             connection.close()
             images = get_images()
             return render_template("gallery.html",images=images, currentuser=currentuser, success_statement='Successfully Updated Image Description!')
+        elif title == 'Move to Front':
+            connection = engine.get_connection()
+            cursor = connection.cursor()
+            cursor.callproc("select_by_value", ("gallery_entry","id",filename))
+            image = get_Db_Results(cursor)
+            image = image[0]
+            original_position = image[1]
+            cursor.callproc("select_all_images", ())
+            images = get_Db_Results(cursor)
+            for image in images:
+                if image[1] == original_position:
+                    break
+                cursor.callproc("select_by_value", ("gallery_entry","id",image[0]))
+                image = get_Db_Results(cursor)
+                image = image[0]
+                position = image[1]
+                new_position = int(position) + 1
+                cursor.callproc("update_by_value", ("gallery_entry","position",new_position,"id",image[0]))
+            cursor.callproc("update_by_value", ("gallery_entry","position","0","id",filename))
+            cursor.close()
+            connection.close()
+            images = get_images()
+            return render_template("gallery.html",images=images, currentuser=currentuser, success_statement='Successfully Moved Image to Front!')
     return render_template("gallery.html",images=images, currentuser=currentuser)
 
 if __name__ == "__main__":
