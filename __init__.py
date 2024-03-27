@@ -69,6 +69,13 @@ def insert_into_db(table,columns,values):
     cursor.close()
     connection.close()
 
+def get_max_position(images):
+    max_position = 0
+    for image in images:
+        if image[1] > max_position:
+            max_position = image[1]
+    return max_position
+
 @app.route('/')
 def index():
     currentuser = check_if_logged_in()
@@ -165,6 +172,10 @@ def gallery(title,filename):
     images = get_images()
     if request.method == 'POST':
         if title == 'Upload':
+            currentuser = check_if_logged_in()
+            if currentuser == None:
+                images = get_images()
+                return render_template("gallery.html",error_statement='You must be logged in to view this page!' ,images=images, currentuser=currentuser)
             description = request.form.get("description")
             if len(description) > 4990:
                 error_statement = "Description is too long!"
@@ -250,6 +261,10 @@ def gallery(title,filename):
             images = get_images()
             return render_template("gallery.html",images=images, currentuser=currentuser, success_statement='Successfully Updated Image Description!')
         elif title == 'Move to Front':
+            currentuser = check_if_logged_in()
+            if currentuser == None:
+                images = get_images()
+                return render_template("gallery.html",error_statement='You must be logged in to view this page!' ,images=images, currentuser=currentuser)
             connection = engine.get_connection()
             cursor = connection.cursor()
             cursor.callproc("select_by_value", ("gallery_entry","id",filename))
@@ -272,6 +287,85 @@ def gallery(title,filename):
             connection.close()
             images = get_images()
             return render_template("gallery.html",images=images, currentuser=currentuser, success_statement='Successfully Moved Image to Front!')
+        elif title == "Move Up":
+            currentuser = check_if_logged_in()
+            if currentuser == None:
+                images = get_images()
+                return render_template("gallery.html",error_statement='You must be logged in to view this page!' ,images=images, currentuser=currentuser)
+            connection = engine.get_connection()
+            cursor = connection.cursor()
+            cursor.callproc("select_by_value", ("gallery_entry","id",filename))
+            image = get_Db_Results(cursor)
+            image = image[0]
+            original_position = image[1]
+            if original_position == 0:
+                pass
+            else:
+                new_position = original_position - 1
+                cursor.callproc("select_by_value", ("gallery_entry","position",new_position))
+                image2 = get_Db_Results(cursor)
+                image2 = image2[0]
+                cursor.callproc("update_by_value", ("gallery_entry","position",original_position,"id",image2[0]))
+                cursor.callproc("update_by_value", ("gallery_entry","position",new_position,"id",filename))
+            cursor.close()
+            connection.close()
+            images = get_images()
+            return render_template("gallery.html",images=images, currentuser=currentuser, success_statement='Successfully Moved Image Up One!')
+        elif title == "Move Back":
+            currentuser = check_if_logged_in()
+            if currentuser == None:
+                images = get_images()
+                return render_template("gallery.html",error_statement='You must be logged in to view this page!' ,images=images, currentuser=currentuser)
+            images = get_images()
+            max_postion = get_max_position(images)
+            connection = engine.get_connection()
+            cursor = connection.cursor()
+            cursor.callproc("select_by_value", ("gallery_entry","id",filename))
+            image = get_Db_Results(cursor)
+            image = image[0]
+            original_position = image[1]
+            if original_position == max_postion:
+                pass
+            else:
+                new_position = original_position + 1
+                cursor.callproc("select_by_value", ("gallery_entry","position",new_position))
+                image2 = get_Db_Results(cursor)
+                image2 = image2[0]
+                cursor.callproc("update_by_value", ("gallery_entry","position",original_position,"id",image2[0]))
+                cursor.callproc("update_by_value", ("gallery_entry","position",new_position,"id",filename))
+            cursor.close()
+            connection.close()
+            images = get_images()
+            return render_template("gallery.html",images=images, currentuser=currentuser, success_statement='Successfully Moved Image Back One!')
+        elif title == 'Move to Back':
+            currentuser = check_if_logged_in()
+            if currentuser == None:
+                images = get_images()
+                return render_template("gallery.html",error_statement='You must be logged in to view this page!' ,images=images, currentuser=currentuser)
+            connection = engine.get_connection()
+            cursor = connection.cursor()
+            cursor.callproc("select_by_value", ("gallery_entry","id",filename))
+            image = get_Db_Results(cursor)
+            image = image[0]
+            original_position = image[1]
+            cursor.callproc("select_all_images", ())
+            images = get_Db_Results(cursor)
+            max_postion = get_max_position(images)
+            images.reverse()
+            for image in images:
+                if image[1] == original_position:
+                    break
+                cursor.callproc("select_by_value", ("gallery_entry","id",image[0]))
+                image = get_Db_Results(cursor)
+                image = image[0]
+                position = image[1]
+                new_position = int(position) - 1
+                cursor.callproc("update_by_value", ("gallery_entry","position",new_position,"id",image[0]))
+            cursor.callproc("update_by_value", ("gallery_entry","position",max_postion,"id",filename))
+            cursor.close()
+            connection.close()
+            images = get_images()
+            return render_template("gallery.html",images=images, currentuser=currentuser, success_statement='Successfully Moved Image to Back!')
     return render_template("gallery.html",images=images, currentuser=currentuser)
 
 if __name__ == "__main__":

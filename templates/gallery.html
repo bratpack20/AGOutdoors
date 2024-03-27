@@ -14,6 +14,7 @@
 
 <div class="container mt-5">
     <h1 class="text-center mb-4">Gallery</h1>
+    {% if currentuser %}
     <div class="d-flex justify-content-center mb-4">
         <form action="{{ url_for('gallery',title='Upload') }}" method="POST" enctype="multipart/form-data">
             <input type="file" name="file" class="form-control">
@@ -22,6 +23,7 @@
             <center><textarea id="description" name="description" placeholder="Enter Image Description..."></textarea></center>
         </form>
     </div>
+    {% endif %}
     <div class="row row-cols-1 row-cols-md-3 g-4">
         {% for image in images %}
         <div class="col">
