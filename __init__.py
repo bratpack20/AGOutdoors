@@ -1,5 +1,9 @@
 from flask import Flask, render_template, request, session
 from datetime import datetime,timedelta
+from PIL import Image, ImageOps
+import pillow_heif
+pillow_heif.register_heif_opener()
+from werkzeug.utils import secure_filename
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -12,12 +16,11 @@ import base64
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 app.permanent_session_lifetime = timedelta(minutes=60)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:ShinyBulbasaur20!@localhost/agoutdoors'
 engine = mysql.connector.pooling.MySQLConnectionPool(
-    host = 'localhost',
-    user = 'root',
-    password = 'ShinyBulbasaur20!',
-    database = 'agoutdoors',
+    host = os.getenv('host'),
+    user = os.getenv('user'),
+    password = os.getenv('password'),
+    database = os.getenv('database'),
     auth_plugin = "mysql_native_password",
     pool_name = "agoutdoors",
     pool_size = 4,
@@ -89,9 +92,11 @@ def login():
         connection = engine.get_connection()
         cursor = connection.cursor() 
         ## create account # testing purposes only
-        # username = encrypt_message(username)
-        # password = encrypt_message(password)
-        # cursor.callproc('insert_into_db',('users','users.username,users.password',f"'{username}','{password}'"))
+        #username = encrypt_message(username)
+        #password = encrypt_message(password)
+        #cursor.callproc('insert_into_db',('users','users.username,users.password',f"'{username}','{password}'"))
+        #cursor.close()
+        #connection.close()
         ##
         ## login
         cursor.callproc("select_all", ("users",))
@@ -181,7 +186,7 @@ def gallery(title,filename):
                 error_statement = "Description is too long!"
                 return render_template("gallery.html",images=images,error_statement=error_statement, currentuser=currentuser)
             description = str(description).replace("'","''")
-            allowed_file_types = ['.png','jpg','.jpeg','.PNG','.JPG','JPEG']
+            allowed_file_types = ['.png','jpg','.jpeg','.heic', '.PNG','.JPG','JPEG', '.HEIC']
             file = request.files['file']
             if not any(str(file.filename).endswith(file_type) for file_type in allowed_file_types):
                 error_statement = "Invalid File Type"
@@ -200,8 +205,37 @@ def gallery(title,filename):
                     cursor.callproc("update_by_value", ("gallery_entry","position",new_position,"id",image[0]))
                 cursor.close()
                 connection.close()
-                insert_into_db('gallery_entry','position,image_name,description',f"0,'{file.filename}','{description}'")
-                file.save(os.path.join('static/gallery', file.filename))
+                #insert_into_db('gallery_entry','position,image_name,description',f"0,'{file.filename}','{description}'")
+                #file.save(os.path.join('static/gallery', file.filename))
+                # --- SAVE FILE, CONVERT HEIC->JPG IF NEEDED, THEN INSERT DB WITH FINAL FILENAME ---
+                upload_folder = os.path.join("static", "gallery")
+                original_filename = file.filename
+                original_filename_lower = (original_filename or "").lower()
+                # Save the uploaded file first (as-is)
+                original_save_path = os.path.join(upload_folder, original_filename)
+                file.save(original_save_path)
+                final_filename = original_filename  # will change if we convert
+                final_save_path = original_save_path
+                # If HEIC, convert to JPG and delete the HEIC
+                if original_filename_lower.endswith(".heic"):
+                    # Create a JPG filename with the same base name
+                    base_name = os.path.splitext(original_filename)[0]
+                    final_filename = f"{base_name}.jpg"
+                    final_save_path = os.path.join(upload_folder, final_filename)
+                    # Convert HEIC -> JPG
+                    with Image.open(original_save_path) as image:
+                        image = ImageOps.exif_transpose(image)   # fixes iPhone rotation
+                        image = image.convert("RGB")             # JPG needs RGB
+                        image.save(final_save_path, "JPEG", quality=85, optimize=True)
+                    # Remove original HEIC file so only JPG remains
+                    os.remove(original_save_path)
+                # Insert into DB using the FINAL filename (jpg if converted)
+                insert_into_db(
+                    "gallery_entry",
+                    "position,image_name,description",
+                    f"0,'{final_filename}','{description}'"
+                )
+                # --- END CONVERT/INSERT ---
                 success_statement = 'Successfully Uploaded Image to Gallery!'
                 images = get_images()
                 return render_template("gallery.html",images=images,success_statement=success_statement, currentuser=currentuser)
@@ -369,4 +403,4 @@ def gallery(title,filename):
     return render_template("gallery.html",images=images, currentuser=currentuser)
 
 if __name__ == "__main__":
-    app.run(debug=True) 
+    app.run(host='0.0.0.0')
